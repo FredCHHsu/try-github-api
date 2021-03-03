@@ -1,0 +1,27 @@
+{
+  "plugins": [
+    "stylelint-scss",
+    "stylelint-selector-bem-pattern",
+    "stylelint-order",
+    "stylelint-config-rational-order/plugin",
+    "stylelint-prettier"
+  ],
+  "extends": [
+    "stylelint-config-recommended",
+    "stylelint-config-recommended-scss",
+    "stylelint-prettier/recommended",
+    "stylelint-config-airbnb",
+    "stylelint-config-rational-order",
+    "stylelint-config-prettier"
+  ],
+  "rules": {
+    "selector-type-no-unknown": null,
+    "string-quotes": null,
+    "rule-empty-line-before": ["always", {
+      "except": "first-nested"
+    }],
+    "max-empty-lines": 1,
+    "selector-combinator-space-before": "always",
+    "selector-combinator-space-after": "always"
+  }
+}
