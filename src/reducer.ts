@@ -21,6 +21,18 @@ export default (state: State, action: Action): State => {
         repos: state.repos.concat(action.payload.res.items),
       };
     }
+    case ACTIONS.showError: {
+      return {
+        ...state,
+        errorMsg: action.payload.errorMsg,
+      };
+    }
+    case ACTIONS.clearError: {
+      return {
+        ...state,
+        errorMsg: '',
+      };
+    }
     default:
       return state;
   }

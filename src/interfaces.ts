@@ -27,4 +27,6 @@ export interface State {
 
 export type Action =
   | { type: ACTIONS.setRepositories; payload: { keyword: string; res: RepositoriesRes } }
-  | { type: ACTIONS.concatRepositories; payload: { page: number; res: RepositoriesRes } };
+  | { type: ACTIONS.concatRepositories; payload: { page: number; res: RepositoriesRes } }
+  | { type: ACTIONS.showError; payload: { errorMsg: string } }
+  | { type: ACTIONS.clearError };

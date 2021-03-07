@@ -5,7 +5,7 @@ import {
 } from 'rxjs/operators';
 import { useEventCallback } from 'rxjs-hooks';
 import React, {
-  ChangeEvent, ReactElement, UIEvent, useReducer,
+  ChangeEvent, ReactElement, UIEvent, useCallback, useReducer,
 } from 'react';
 import _get from 'lodash/get';
 
@@ -29,15 +29,26 @@ export const initialValue: State = {
 };
 
 function App(): ReactElement {
-  console.log('render');
-
   const [state, dispatch] = useReducer(reducer, initialValue);
+
+  const handleAjaxError = useCallback((err) => {
+    const responseMsg = _get<string>(err, 'response.message', '');
+    dispatch({
+      type: ACTIONS.showError,
+      payload: {
+        errorMsg: responseMsg.includes('API rate limit exceeded')
+          ? 'API rate limit exceeded, please wait a minute'
+          : responseMsg,
+      },
+    });
+  }, []);
 
   const [handleChange] = useEventCallback(
     (event$: Observable<ChangeEvent<HTMLInputElement>>) => event$.pipe(
       debounceTime(500),
       distinctUntilChanged(),
       map((e) => {
+        if (!e.target.value) return;
         getRepositories$(e.target.value).subscribe(
           (res) => dispatch({
             type: ACTIONS.setRepositories,
@@ -46,8 +57,7 @@ function App(): ReactElement {
               res: res.response as RepositoriesRes,
             },
           }),
-          (err) => console.log(_get(err, 'response.message', '')),
-
+          (err) => handleAjaxError(err),
         );
       }),
     ),
@@ -73,8 +83,7 @@ function App(): ReactElement {
               res: res.response as RepositoriesRes,
             },
           }),
-          (err) => console.log(_get(err, 'response.message', '')),
-
+          (err) => handleAjaxError(err),
         );
       }),
     ),
@@ -82,15 +91,20 @@ function App(): ReactElement {
     [state],
   );
 
+  const handleClearError = useCallback(() => {
+    dispatch({ type: ACTIONS.clearError });
+  }, []);
+
   return (
     <div
       className="App"
       style={{ maxHeight: '100vh', overflow: 'scroll' }}
       onScroll={handleScroll}
     >
-      {state.errorMsg && (
-        <div>{state.errorMsg}</div>
-      )}
+      <div className={`snackbar${state.errorMsg ? ' show' : ''}`}>
+        {state.errorMsg}
+        <button type="button" onClick={handleClearError}>Got it</button>
+      </div>
       <div style={{ paddingTop: 12, marginBottom: 12 }}>
         <span>Search Github: </span>
         <input
@@ -99,18 +113,11 @@ function App(): ReactElement {
         />
       </div>
       {state.repos.map((item) => (
-        <div key={item.id}>
-          <div style={{
-            marginBottom: 8,
-            border: '1px solid #ccc',
-            borderRadius: 8,
-            padding: '12px 24px',
-            width: 320,
-          }}
-          >
+        <a key={item.id} href={item.html_url}>
+          <div className="repo-card">
             {`${item.full_name} (${item.stargazers_count})`}
           </div>
-        </div>
+        </a>
       ))}
     </div>
   );
