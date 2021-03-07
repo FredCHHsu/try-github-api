@@ -19,6 +19,8 @@
       "project": "tsconfig.json"
     },
     "rules": {
+      "no-unused-vars": "off",
+      "@typescript-eslint/no-unused-vars": ["warn"],
       "@typescript-eslint/type-annotation-spacing": "error",
       "@typescript-eslint/member-delimiter-style": "error"
     }
