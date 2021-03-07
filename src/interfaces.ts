@@ -20,9 +20,9 @@ export interface RepositoriesRes {
 export interface State {
   keyword: string;
   totalCount: number;
-  isIncomplete: boolean;
   page: number;
   repos: Repository[];
+  errorMsg: string;
 }
 
 export type Action =

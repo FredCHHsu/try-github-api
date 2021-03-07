@@ -1,7 +1,7 @@
 import { Observable } from 'rxjs';
 import { ajax } from 'rxjs/ajax';
 import {
-  debounceTime, distinctUntilChanged, filter, map, throttleTime,
+  debounceTime, distinctUntilChanged, filter, map, withLatestFrom,
 } from 'rxjs/operators';
 import { useEventCallback } from 'rxjs-hooks';
 import React, {
@@ -10,7 +10,7 @@ import React, {
 import _get from 'lodash/get';
 
 import {
-  Action, RepositoriesRes, State,
+  RepositoriesRes, State,
 } from './interfaces';
 import ACTIONS from './actions';
 import reducer from './reducer';
@@ -24,8 +24,8 @@ export const initialValue: State = {
   keyword: '',
   repos: [],
   totalCount: 0,
-  isIncomplete: false,
   page: 1,
+  errorMsg: '',
 };
 
 function App(): ReactElement {
@@ -47,12 +47,40 @@ function App(): ReactElement {
             },
           }),
           (err) => console.log(_get(err, 'response.message', '')),
+
         );
       }),
     ),
   );
 
-  const handleScroll = () => {};
+  const [handleScroll] = useEventCallback(
+    (event$: Observable<UIEvent<HTMLElement>>,
+      state$: Observable<unknown>,
+      inputs$: Observable<[State]>) => event$.pipe(
+      filter((e) => {
+        const element = e.currentTarget;
+        const bottom = element.scrollHeight - element.scrollTop === element.clientHeight;
+        if (bottom) return true;
+        return false;
+      }),
+      withLatestFrom(inputs$),
+      map(([e, [stat]]) => {
+        getRepositories$(stat.keyword, stat.page + 1).subscribe(
+          (res) => dispatch({
+            type: ACTIONS.concatRepositories,
+            payload: {
+              page: stat.page + 1,
+              res: res.response as RepositoriesRes,
+            },
+          }),
+          (err) => console.log(_get(err, 'response.message', '')),
+
+        );
+      }),
+    ),
+    undefined,
+    [state],
+  );
 
   return (
     <div
@@ -60,6 +88,9 @@ function App(): ReactElement {
       style={{ maxHeight: '100vh', overflow: 'scroll' }}
       onScroll={handleScroll}
     >
+      {state.errorMsg && (
+        <div>{state.errorMsg}</div>
+      )}
       <div style={{ paddingTop: 12, marginBottom: 12 }}>
         <span>Search Github: </span>
         <input
