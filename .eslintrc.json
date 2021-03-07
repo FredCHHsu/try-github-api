@@ -1,0 +1,28 @@
+{
+  "extends": [
+    "react-app"
+  ],
+  "plugins": [
+    "sort-imports-es6-autofix"
+  ],
+  "rules": {
+    "sort-imports-es6-autofix/sort-imports-es6": "error"
+  },
+  "overrides": [{
+    "files": ["**/*.ts?(x)"],
+    "extends": [
+      "plugin:@typescript-eslint/recommended",
+      "plugin:@typescript-eslint/recommended-requiring-type-checking",
+      "airbnb-typescript"
+    ],
+    "parserOptions": {
+      "project": "tsconfig.json"
+    },
+    "rules": {
+      "no-unused-vars": "off",
+      "@typescript-eslint/no-unused-vars": ["warn"],
+      "@typescript-eslint/type-annotation-spacing": "error",
+      "@typescript-eslint/member-delimiter-style": "error"
+    }
+  }]
+}
